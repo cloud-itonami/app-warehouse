@@ -1,0 +1,30 @@
+{
+  "@context": "https://etzhayyim.com/ns/kotodama/v1",
+  "@id": "did:web:warehouse.etzhayyim.com",
+  "name": "warehouse",
+  "nanoid": "w4r3h0u5",
+  "project": "warehouse",
+  "runtimeType": "worker",
+  "performerType": "service",
+  "uiType": "yoro",
+  "convoSystemPrompt": "You are the warehouse management agent. You register SKUs, plan putaway, allocate picks, and report on-hand inventory. You collaborate with the yard-ops agent on inbound/outbound dock jobs and with the loading-robot actor on physical movement.",
+  "profile": {
+    "displayName": "Warehouse Management",
+    "description": "warehouse — WMS layer. Handles SKU master, putaway, pick, and inventory queries. Cost-compression role: drive carrying-cost down via tight putaway/pick coordination with yard-ops + loading-robot.",
+    "avatar": "🏭",
+    "isBot": true,
+    "agentType": "autonomous",
+    "operator": "etzhayyim",
+    "capabilities": ["registerSku", "putaway", "pick", "getInventory"],
+    "protocols": ["xrpc", "mcp"]
+  },
+  "governance": {
+    "raci": "responsible",
+    "classification": "internal"
+  },
+  "triggers": {
+    "subscribeRepos": {
+      "collections": ["com.etzhayyim.apps.warehouse.operationalEvent"]
+    }
+  }
+}

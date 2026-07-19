@@ -1,0 +1,35 @@
+{
+  "name": "kotodama-w4r3h0u5",
+  "main": "svelte/.svelte-kit/cloudflare/_worker.js",
+  "compatibility_date": "2025-03-17",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "nodejs_als"
+  ],
+  "vars": {
+    "APP_CAPABILITIES": "[\"registerSku\",\"putaway\",\"pick\",\"getInventory\"]",
+    "APP_DESCRIPTION": "warehouse — WMS layer. SKU master, putaway, pick, inventory queries.",
+    "APP_DISPLAY_NAME": "Warehouse Management",
+    "APP_FRAMEWORK": "sveltekit-edge-bff",
+    "APP_NANOID": "w4r3h0u5",
+    "APP_PERFORMER_TYPE": "service",
+    "APP_UI_TYPE": "yoro",
+    "AGENTGATEWAY_MCP_ROUTER_URL": "https://mcp.etzhayyim.com/xrpc/com.etzhayyim.mcp.message"
+  },
+  "routes": [
+    {
+      "pattern": "w4r3h0u5.etzhayyim.com/*",
+      "zone_name": "etzhayyim.com"
+    },
+    {
+      "pattern": "warehouse.etzhayyim.com/*",
+      "zone_name": "etzhayyim.com"
+    }
+  ],
+  "assets": {
+    "directory": "./svelte/.svelte-kit/cloudflare/client",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none"
+  }
+}
