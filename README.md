@@ -22,7 +22,36 @@ with its live dependencies gone, not code that has decayed past use.
 
 Every claim below is reproducible from
 [`docs/operator-quickstart.md`](docs/operator-quickstart.md), measured
-2026-08-17.
+2026-08-17 — **except where marked below**: this section, the two-dispatchers
+table, and the provenance section were overtaken by the frontend migration
+described next.
+
+## Frontend migrated to ClojureScript (2026-08-26)
+
+The `svelte/` directory (SvelteKit) is gone. The frontend is now
+ClojureScript — reagent + re-frame + `jp-go-dds` (デジタル庁デザインシステム) —
+at [`cljs/`](../cljs). This was a **frontend-only** migration; the backend
+Worker/XRPC logic was moved, not rewritten:
+
+| Then | Now |
+|---|---|
+| `svelte/src/routes/+page.svelte` (the status page below documents) | [`cljs/src/warehouse/app.cljs`](../cljs/src/warehouse/app.cljs) — same seven facts + own path, faithfully ported |
+| `svelte/src/routes/xrpc/[...path]/+server.ts` (**the file that deployed**, per the table below) | [`src/xrpc-dispatcher.ts`](../src/xrpc-dispatcher.ts) — moved byte-for-byte, only a provenance header comment added |
+| `wrangler.jsonc` `main: svelte/.svelte-kit/cloudflare/_worker.js` | `main` dropped entirely |
+| `wrangler.jsonc` `assets.directory: ./svelte/.svelte-kit/cloudflare/client` | `assets.directory: ./cljs/public` |
+
+**This changes the "two dispatchers, only one deploys" story below to "two
+dispatchers, neither deploys."** Neither `src/app.ts` nor `src/xrpc-dispatcher.ts`
+calls `env.ASSETS.fetch`, so `main` was dropped rather than repointed at either
+— putting either Worker in front of the static assets with no `env.ASSETS.fetch`
+call would mean nothing serves the frontend. Both backend files are now
+equally orphaned source, same status `src/app.ts` already had. This is
+**unverified**: `wrangler deploy`/`wrangler dev` were not run.
+
+Everything from here to "Where the warehouse domain lives" is the
+**2026-08-17, pre-migration snapshot** — kept for its investigative value
+(the DNS/provenance measurements it reports are still accurate as historical
+record), but any path under `svelte/` it names no longer exists.
 
 ## What changed underneath it
 
@@ -99,16 +128,18 @@ build is evidence the code is sound, not evidence the build is reproducible.
 ## What is actually in here
 
 Twelve tracked files, 13,282 bytes, extracted verbatim from
-`etzhayyim/root@c9e7df4b:60-apps/etzhayyim-project-warehouse`.
+`etzhayyim/root@c9e7df4b:60-apps/etzhayyim-project-warehouse`, **as of
+2026-08-17, before the 2026-08-26 frontend migration**. The table below is
+that original snapshot; the "Now" column says where each moved.
 
-| Path | Role |
-|---|---|
-| `src/app.ts` | Thin-edge dispatcher, 4 methods. **Unreferenced — see above.** |
-| `svelte/src/routes/xrpc/[...path]/+server.ts` | The handler that actually deploys. |
-| `svelte/src/routes/+page.svelte` | Placeholder status page. Its embedded metadata says `routeCount: 0`, `routes: []`. |
-| `wrangler.jsonc` | Worker config, routes, and the app's `vars` (capabilities, display name). |
-| `kotodama.jsonld` | Actor descriptor — DID, system prompt, capabilities, governance `raci: responsible`. |
-| `NOTICE` | Apache-2.0 + etzhayyim Charter Rider v3.1. |
+| Path (2026-08-17) | Role | Now (2026-08-26) |
+|---|---|---|
+| `src/app.ts` | Thin-edge dispatcher, 4 methods. **Unreferenced — see above.** | Unchanged, still unreferenced. |
+| `svelte/src/routes/xrpc/[...path]/+server.ts` | The handler that actually deployed. | Moved verbatim to `src/xrpc-dispatcher.ts` — no longer deployed either (`wrangler.jsonc` `main` was dropped). |
+| `svelte/src/routes/+page.svelte` | Placeholder status page. Its embedded metadata says `routeCount: 0`, `routes: []`. | Ported to `cljs/src/warehouse/app.cljs` (reagent + re-frame + jp-go-dds). |
+| `wrangler.jsonc` | Worker config, routes, and the app's `vars` (capabilities, display name). | Same file, `main`/`assets.directory`/`APP_FRAMEWORK` updated — see "Frontend migrated" above. |
+| `kotodama.jsonld` | Actor descriptor — DID, system prompt, capabilities, governance `raci: responsible`. | Unchanged. |
+| `NOTICE` | Apache-2.0 + etzhayyim Charter Rider v3.1. | Unchanged. |
 
 `README.edn` and `migration.edn` are machine-readable records added by the
 extraction tooling; they are the two entries in `migration.edn`'s
@@ -121,12 +152,28 @@ static surface has no SPA fallback.
 
 ### Provenance is intact
 
-Verified byte-for-byte on 2026-08-17. `migration.edn` declares `:tree
-f19958a84d…`, `:tracked-files 12`, `:bytes 13282`; the real upstream tree sha for
-that path at that revision is `f19958a84d2822f0a320fc137485bcf0b0c50206`, and the
-twelve files still total exactly 13,282 bytes. The one subsequent commit
+Verified byte-for-byte on 2026-08-17, **before** the 2026-08-26 frontend
+migration added `cljs/` and moved the XRPC handler to `src/xrpc-dispatcher.ts`.
+`migration.edn` declares `:tree f19958a84d…`, `:tracked-files 12`,
+`:bytes 13282`; the real upstream tree sha for that path at that revision is
+`f19958a84d2822f0a320fc137485bcf0b0c50206`, and the twelve files (as they
+stood on 2026-08-17) totalled exactly 13,282 bytes. The one subsequent commit
 (`db2531e`, "record cloud-itonami ownership") touched only `README.edn` and
-`migration.edn` — the two permitted additions. **Nothing drifted.**
+`migration.edn` — the two permitted additions. **Nothing drifted before the
+frontend migration.**
+
+That said: `migration.edn`'s `:allowed-additions` was never an enforced
+allowlist — no checker in this repository pins `svelte/` (or anything else)
+by hash against it (confirmed again while doing the 2026-08-26 migration; see
+"What to do with it" for the standing options this repo has always had, one
+of which — re-home or retire — would have changed the tree regardless). The
+twelve 2026-08-17 files are still individually traceable to the upstream
+commit above; the frontend migration adds new files on top rather than
+altering any of those twelve at the byte level (`src/app.ts`, `wrangler.jsonc`'s
+non-frontend fields, `kotodama.jsonld`, `NOTICE`, `README.edn`, `migration.edn`
+are untouched; `svelte/src/routes/xrpc/[...path]/+server.ts` moved with only a
+provenance comment added; `svelte/src/routes/+page.svelte` and the rest of
+`svelte/` were replaced by the `cljs/` port).
 
 `etzhayyim/com-etzhayyim-app-warehouse` is a **GitHub redirect to this
 repository**, not a second copy. This repo is registered in `manifest/west.yml`
