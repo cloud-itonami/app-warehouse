@@ -5,6 +5,16 @@ surface (see [`../README.md`](../README.md)), so its operational task is
 **confirming that it is still dormant, and still revivable** — two separate
 claims, both resting on measurements that go stale.
 
+> **2026-08-26 update: the frontend was migrated from SvelteKit to
+> ClojureScript** (`svelte/` → `cljs/`, reagent + re-frame + jp-go-dds; see
+> `../README.md`'s "Frontend migrated" section). Checks 3–6 below were run on
+> 2026-08-17, **before** that migration, and every `svelte/`-rooted path they
+> name is gone. They are kept because the DNS/dormancy facts they establish
+> (checks 1–2) and the historical provenance measurement (check 6, against the
+> original 2026-08-17 tree) are still accurate as a record of what this repo
+> was extracted from — not because those specific commands still run
+> unmodified today. Check 7, added below, is the current build check.
+
 Six checks, about two minutes. Every command below was run on 2026-08-17 from
 the repository root, and the output shown is what it printed.
 
@@ -209,6 +219,31 @@ Note that `README.md` and this file are *not* in `migration.edn`'s
 migration time; it is not an enforced allowlist, and nothing in the workspace
 verifies it. Excluding both by name, as above, keeps the byte count comparable.
 
+## 7. Does the ClojureScript frontend build and test clean? (added 2026-08-26)
+
+`svelte/` no longer exists — the frontend is `cljs/` (shadow-cljs + reagent +
+re-frame + jp-go-dds). Two builds and a test run, from the repository root:
+
+```bash
+cd cljs
+npm install --no-audit --no-fund
+node <root>/scripts/resource-guard.mjs run build -- npx shadow-cljs compile app
+node <root>/scripts/resource-guard.mjs run build -- npx shadow-cljs compile test
+node out/tests.js
+```
+
+```
+added 129 packages
+[:app] Build completed. (111 files, 110 compiled, 0 warnings, 21.31s)
+[:test] Build completed. (112 files, 111 compiled, 0 warnings, 10.42s)
+Ran 5 tests containing 14 assertions.
+0 failures, 0 errors.
+```
+
+Measured 2026-08-26. `wrangler deploy`/`wrangler dev` were **not** run against
+the updated `wrangler.jsonc` — that remains unverified (see the repo README's
+"Frontend migrated" section).
+
 ---
 
 ## If every check holds
@@ -226,6 +261,7 @@ README's account of it is current.
 | 4 | build fails | The unpinned dependency tree drifted. Option 1 in the README just got more expensive; record the failing version before reacting. |
 | 5 | `EXIT=0` on the first command | A `tsconfig.json` appeared at root. Verify it actually covers `src/`, rather than passing by checking nothing. |
 | 6 | count, bytes, or sha differ | The working tree drifted from the recorded extraction. Do **not** retire — reconcile against upstream first. |
+| 7 | either build or the test run fails | The `cljs/` dependency tree (or jp-go-dds itself) drifted since 2026-08-26. Record the failing output before reacting — this frontend has no lockfile pinning `reagent`/`re-frame`/`shadow-cljs` versions either. |
 
 **Do not archive, delete, or re-point DNS on the strength of these checks
 alone.** They establish that the surface is dormant and revivable, not that the

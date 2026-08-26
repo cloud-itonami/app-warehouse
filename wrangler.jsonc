@@ -1,6 +1,25 @@
 {
+  // NOTE: this app used to be built by SvelteKit's @sveltejs/adapter-cloudflare,
+  // which emitted both a server-rendering Worker script (`main`, the deployed
+  // XRPC handler at svelte/src/routes/xrpc/[...path]/+server.ts) and a static
+  // client bundle (`assets.directory`, the +page.svelte status page). The
+  // frontend was migrated to a plain ClojureScript (shadow-cljs + reagent +
+  // re-frame + jp-go-dds) static bundle with no server-rendering step — see
+  // cljs/ and the repo README. `main` is dropped (a Cloudflare Worker can be
+  // assets-only) and `assets.directory` now points at the cljs build output.
+  //
+  // `main` is NOT repointed at either Worker source still in this repo
+  // (`src/app.ts` or the moved `src/xrpc-dispatcher.ts`): neither calls
+  // `env.ASSETS.fetch`, so putting either in front of the assets would mean
+  // nothing serves the static files. Both remain orphaned source, same as
+  // before this migration (src/app.ts was already unreferenced).
+  //
+  // This edit is unverified: `wrangler deploy`/`wrangler dev` were not run
+  // against it. All four hostnames this app used to speak to (its own two
+  // routes below, plus the two upstreams its dispatchers proxied to) are
+  // NXDOMAIN as of 2026-08-17 (see docs/operator-quickstart.md) — this repo
+  // was already dormant before this migration.
   "name": "kotodama-w4r3h0u5",
-  "main": "svelte/.svelte-kit/cloudflare/_worker.js",
   "compatibility_date": "2025-03-17",
   "compatibility_flags": [
     "nodejs_compat",
@@ -10,7 +29,7 @@
     "APP_CAPABILITIES": "[\"registerSku\",\"putaway\",\"pick\",\"getInventory\"]",
     "APP_DESCRIPTION": "warehouse — WMS layer. SKU master, putaway, pick, inventory queries.",
     "APP_DISPLAY_NAME": "Warehouse Management",
-    "APP_FRAMEWORK": "sveltekit-edge-bff",
+    "APP_FRAMEWORK": "cljs-reagent-re-frame-jp-go-dds",
     "APP_NANOID": "w4r3h0u5",
     "APP_PERFORMER_TYPE": "service",
     "APP_UI_TYPE": "yoro",
@@ -27,7 +46,7 @@
     }
   ],
   "assets": {
-    "directory": "./svelte/.svelte-kit/cloudflare/client",
+    "directory": "./cljs/public",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "none"
