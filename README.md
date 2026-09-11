@@ -35,7 +35,7 @@ Worker/XRPC logic was moved, not rewritten:
 
 | Then | Now |
 |---|---|
-| `svelte/src/routes/+page.svelte` (the status page below documents) | [`cljs/src/warehouse/app.cljs`](../cljs/src/warehouse/app.cljs) — same seven facts + own path, faithfully ported |
+| `svelte/src/routes/+page.svelte` (the status page below documents) | [`cljs/src/warehouse/app.cljk`](../cljs/src/warehouse/app.cljk) — same seven facts + own path, faithfully ported |
 | `svelte/src/routes/xrpc/[...path]/+server.ts` (**the file that deployed**, per the table below) | [`src/xrpc-dispatcher.ts`](../src/xrpc-dispatcher.ts) — moved byte-for-byte, only a provenance header comment added |
 | `wrangler.jsonc` `main: svelte/.svelte-kit/cloudflare/_worker.js` | `main` dropped entirely |
 | `wrangler.jsonc` `assets.directory: ./svelte/.svelte-kit/cloudflare/client` | `assets.directory: ./cljs/public` |
@@ -136,7 +136,7 @@ that original snapshot; the "Now" column says where each moved.
 |---|---|---|
 | `src/app.ts` | Thin-edge dispatcher, 4 methods. **Unreferenced — see above.** | Unchanged, still unreferenced. |
 | `svelte/src/routes/xrpc/[...path]/+server.ts` | The handler that actually deployed. | Moved verbatim to `src/xrpc-dispatcher.ts` — no longer deployed either (`wrangler.jsonc` `main` was dropped). |
-| `svelte/src/routes/+page.svelte` | Placeholder status page. Its embedded metadata says `routeCount: 0`, `routes: []`. | Ported to `cljs/src/warehouse/app.cljs` (reagent + re-frame + jp-go-dds). |
+| `svelte/src/routes/+page.svelte` | Placeholder status page. Its embedded metadata says `routeCount: 0`, `routes: []`. | Ported to `cljs/src/warehouse/app.cljk` (reagent + re-frame + jp-go-dds). |
 | `wrangler.jsonc` | Worker config, routes, and the app's `vars` (capabilities, display name). | Same file, `main`/`assets.directory`/`APP_FRAMEWORK` updated — see "Frontend migrated" above. |
 | `kotodama.jsonld` | Actor descriptor — DID, system prompt, capabilities, governance `raci: responsible`. | Unchanged. |
 | `NOTICE` | Apache-2.0 + etzhayyim Charter Rider v3.1. | Unchanged. |

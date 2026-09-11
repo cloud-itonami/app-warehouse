@@ -61,7 +61,7 @@
               "APP_DISPLAY_NAME" "APP_FRAMEWORK" "APP_NANOID" "APP_PERFORMER_TYPE"
               "APP_UI_TYPE"]
    :app/xrpc? false
-   :app/relative-path "cljs/src/warehouse/app.cljs"})
+   :app/relative-path "cljs/src/warehouse/app.cljk"})
 
 (rf/reg-event-db
  :initialize-db
