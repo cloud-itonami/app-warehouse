@@ -227,8 +227,8 @@ re-frame + jp-go-dds). Two builds and a test run, from the repository root:
 ```bash
 cd cljs
 npm install --no-audit --no-fund
-node <root>/scripts/resource-guard.mjs run build -- npx shadow-cljs compile app
-node <root>/scripts/resource-guard.mjs run build -- npx shadow-cljs compile test
+node <root>/scripts/resource-guard.mjs run build -- amu compile --target wasm32-browser app
+node <root>/scripts/resource-guard.mjs run build -- amu compile --target wasm32-browser test
 node out/tests.js
 ```
 
